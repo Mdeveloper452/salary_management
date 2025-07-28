@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Details Form</title>
+    <style>
+        body {
+            width: auto;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .form-container {
+            max-width: auto;
+                margin: auto;
+                background: white;
+                padding: 10px;
+                border-radius: 8px;
+                box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: larger;
+            text-align: center;
+            color: #131212;
+        }
+        label {
+            font-size: 15px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input, select {
+            width: 100%;
+                padding: 10px;
+                margin-top: 5px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 16px;
+        }
+        input[type="submit"] {
+            width: auto;
+            background-color: #4CAF50;
+            color: rgb(212, 250, 225);
+            border: none;
+            cursor: pointer;
+            align-self: center;
+            box-align: center;
+        }
+        input[type="submit"]:hover {
+           align-items: center;
+           align-content: center;
+           box-align: center;
+            background-color: #45a049;
+        }
+        .form-group {
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        select{
+            width:100%;
+            padding: 10px; 
+            }
+        
+        .deduction-row {
+            margin-bottom: 10px;
+        }
+        .deduction-row input,
+        .deduction-row select {
+            width: 45%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .deduction-row button {
+            width: auto;
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .deduction-row button:hover {
+            background-color: #45a049;
+        }
+        
+        .otherearningrow {
+            margin-bottom: 10px;
+        }
+        .otherearningrow input,
+        .otherearningrow select {
+            width: 45%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .otherearningrow button {
+            width: auto;
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .otherearningrow button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <div class="form-container">
+        <h1>Enter Salary Details</h1>
+        <form method="POST" action="{{url_for('salary_form')}}">
+            
+            <div class="form-group">
+                <label for="emp_Id">Employee ID:</label>
+                <input type="number" id="emp_Id" name="emp_Id" required onblur="fetchEmployeeData()"><br><br>
+
+            </div>
+
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" readonly><br><br>
+            </div>
+
+            <div class="form-group">
+                <label for="deptt">Department Code:</label>
+                <input type="number" id="deptt" name="deptt"  readonly><br><br>
+        
+            </div>
+            
+            <div class="form-group">
+                <label for="depttname">Department Name:</label>
+                <input type="text" id="depttname" name="depttname"  readonly><br><br>
+            </div>
+
+            <div class="form-group">
+                <label for="basicpay">Basic Pay Rate:</label>
+                <input type="number" id="basicpay" name="basicpay" oninput="calculatenetbasicpay()"  readonly><br><br>
+        
+            </div>
+
+            <div class="form-group">
+                <label for="bankaccountno">Bank Account Number:</label>
+                <input type="text" id="bankaccountno" name="bankaccountno"  readonly><br><br>
+            </div>
+
+            <div class="form-group">
+                <label for="year">Year:</label>
+                <input type="number" id="year" name="year" required><br><br>
+            </div>
+
+            <div class="form-group">
+                <label for="month">Month:</label>
+                <select id="month" name="month" onchange="updateDays()">
+                    <option value="">--Select Month--</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="totalDays">Total Days:</label>
+                <input type="number" id="totalDays" name="totalDays" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="absentdays">Absent days:</label>
+                <input type="number" id="absentdays" name="absentdays" value="0" oninput="updateRemainingDays()">
+            </div>
+
+            <div class="form-group">
+                <label for="remainingleave">Remaining days:</label>
+                <input type="number" id="remainingleave" name="remainingleave" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="netbasicpay">Basic pay:</label>
+                <input type="number" id="netbasicpay" name="netbasicpay" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="deduction">Deductions:</label>
+                <div id="deduction">
+
+                </div>
+                <button type="button" id="addDeduction" onclick="manageDeductions()">Add new:</button>
+            </div>
+
+            <div class="form-group">
+                <label for="otherearning">Other Earning:</label>
+                <div id="otherearning">
+
+                </div>
+                <button type="button" id="addOtherearning" onclick="manageOtherearning()">Add new:</button>
+            </div> 
+            
+            <div class="form-group">
+                <label for="hra">HRA:</label>
+                <input type="number" id="hra" name="hra" readonly placeholder="HRA"><br><br>
+            </div>
+
+         
+            <div class="form-group">
+                <label for="netpay">Net Pay:</label>
+                <input type="number" id="netpay" name="netpay" required readonly><br><br>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Submit">
+            </div>
+            <div class="form-group">
+                <button type="submit" name="action" value="preview">Generate Salary Slip</button>
+            </div>
+            <input type="hidden" id="deductionCount" name="deductionCount" value="1">
+            <input type="hidden" id="otherearningCount" name="otherearningCount" value="1">
+
+    </form>
+    <script>
+        // Before submitting the form, update the hidden input values
+$('form').on('submit', function() {
+    // Update hidden counts before submission
+    $('#deductionCount').val(deductionCount);
+    $('#otherearningCount').val(otherearningCount);
+});
+
+
+        let deductionCount = 0;
+
+// Function to manage deductions (add, remove, and update)
+function manageDeductions() {
+    // Add new deduction row
+//$('#addDeduction').click(function() {
+        deductionCount++;
+        $('#deductionCount').val(deductionCount); // Update hidden field
+
+
+        const newDeductionRow = `
+            <div class="deduction-row" id="deduction-${deductionCount}">
+                <select name="deduction_code_${deductionCount}" id="deduction_code_${deductionCount}">
+                    <option value="">--Select Deduction Code--</option>
+                    <option value="1">Tax</option>
+                    <option value="2">Provident Fund</option>
+                    <option value="3">Loan</option>
+                    <!-- Add more deduction codes as needed -->
+                </select>
+                <input type="number" name="deduction_amount_${deductionCount}" id="deduction_amount_${deductionCount}" placeholder="Amount" oninput="updateNetPay()">
+                <button type="button" onclick="removeDeduction(${deductionCount})">Remove</button>
+            </div>
+        `;
+
+        $('#deduction').append(newDeductionRow);  // Append new row to deductions container
+    };
+
+    // Remove a deduction row
+    window.removeDeduction = function(id) {
+        $(`#deduction-${id}`).remove();  // Remove the selected row
+        updateNetPay();  // Recalculate deductions
+    }
+
+    // OTHEREARNINGS FUNCTION
+     let otherearningCount=0;
+    function manageOtherearning(){
+    otherearningCount++;
+     $('#otherearningCount').val(otherearningCount); // Update hidden field
+
+    const newOtherearningRow=`
+    <div class="otherearningrow" id="otherearning-${otherearningCount}">
+        <select name="otherearning_code_${otherearningCount}" id="otherearning_code_${otherearningCount}">
+            <option value="">--Select Other earning Code--</option>
+            <option value="1">Bonus</option>
+            <option value="2">Incentive</option>
+            <option value="3">Overtime</option>
+        </select>
+        <input type="number" name="otherearning_amount_${otherearningCount}" id="otherearning_amount_${otherearningCount}" placeholder="Amount" oninput="updateNetPay()">
+        <button type="button" onclick="removeOtherearning(${otherearningCount})">Remove</button>
+        </div>    
+    `;
+
+    $('#otherearning').append(newOtherearningRow);
+}
+
+window.removeOtherearning = function(id){
+    $(`#otherearning-${id}`).remove();
+    updateNetPay();
+};
+   // Update the net pay (subtract total deductions from net basic pay)
+        function updateNetPay(){
+        const netBasicPay = parseFloat(document.getElementById('netbasicpay').value) || 0;
+        const hra = parseFloat(document.getElementById('hra').value) || 0;
+
+        let totalDeductions = 0;
+        // Loop through all deduction inputs and sum their values
+        for (let i = 1; i <= deductionCount; i++) {
+            const deductionAmount = parseFloat($(`#deduction_amount_${i}`).val()) || 0;
+            totalDeductions += deductionAmount;
+        }
+
+        let totalOtherearnings = 0;
+    for (let i = 1; i <= otherearningCount; i++) {
+        const otherearningAmount = parseFloat($(`#otherearning_amount_${i}`).val()) || 0;
+        totalOtherearnings += otherearningAmount;
+    }
+
+        const netPay = (netBasicPay+hra+totalOtherearnings) - totalDeductions;
+        document.getElementById('netpay').value = netPay.toFixed(2);
+    }
+
+    $(document).on('input', '#netbasicpay, #hra', function() {
+            updateNetPay();
+        });
+
+    $(document).on('input', '.deduction-row input', function(){
+        updateNetPay();
+    });
+
+    $(document).on('input', '.otherearningrow input', function(){
+        updateNetPay();
+    });
+   
+    $(document).ready(function() {
+            manageDeductions();
+            manageOtherearning();
+        });
+
+
+
+    function updateDays() {
+        const month = document.getElementById('month').value;
+        const totalDaysInput = document.getElementById('totalDays');
+        
+        let days = 0;
+
+        // Check for each month
+        if (month == '1' || month == '3' || month == '5' || month == '7' || month == '8' || month == '10' || month == '12') {
+            days = 31; // These months have 31 days
+        } else if (month == '4' || month == '6' || month == '9' || month == '11') {
+            days = 30; // These months have 30 days
+        } else if (month == '2') {
+            // Handle February (leap year check)
+            const year = new Date().getFullYear();
+            days = isLeapYear(year) ? 29 : 28; // Leap year logic
+        }
+
+        totalDaysInput.value = days; // Update the days field
+        updateRemainingDays();
+    }
+
+    function updateRemainingDays() {
+        const totalDays = parseInt(document.getElementById('totalDays').value);
+        const absentdays = parseInt(document.getElementById('absentdays').value);
+        const remainingleaveInput = document.getElementById('remainingleave');
+
+        if (!isNaN(totalDays) && !isNaN(absentdays)) {
+            const remainingleave = totalDays - absentdays;
+            remainingleaveInput.value = remainingleave >= 0 ? remainingleave : 0; // Ensure no negative days
+            calculatenetbasicpay();
+
+        }
+    }
+
+    function calculatenetbasicpay(){
+        const basicpay= parseFloat(document.getElementById('basicpay').value);
+        const remainingleave = parseFloat(document.getElementById('remainingleave').value);
+        const totalDays = parseFloat(document.getElementById('totalDays').value);
+        const netbasicpayinput = document.getElementById('netbasicpay');
+        const hraInput = document.getElementById('hra');
+
+        if (!isNaN(basicpay) && !isNaN(remainingleave)&& !isNaN(totalDays)) {
+            const basicpayrate = (remainingleave / totalDays) *basicpay;
+            netbasicpayinput.value = basicpayrate.toFixed(2);
+            const hra = basicpayrate*0.30;
+            hraInput.value=hra.toFixed(2);
+            updateNetPay();
+        }
+    }
+
+    // Function to check if the year is a leap year
+    function isLeapYear(year) {
+        return (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0));
+    }
+
+
+
+
+        // Function to fetch employee data on entering Employee ID
+        function fetchEmployeeData() {
+            var empId = $('#emp_Id').val();  // Get the Employee ID entered in the input field
+
+            if (empId) {
+                // Make an AJAX GET request to the server
+                $.ajax({
+                    url: '/fetch_employee',  // Your Flask route
+                    method: 'GET',
+                    data: { emp_Id: empId },
+                    success: function(response) {
+                        if (response.error) {
+                            alert(response.error);
+                        } else {
+                            // Fill the form fields with the data returned from the server
+                            $('#name').val(response.name || '');
+                            $('#deptt').val(response.deptt || '');
+                            $('#depttname').val(response.depttname || '');
+                            $('#basicpay').val(response.basicpay || '');
+                            $('#bankaccountno').val(response.bankaccountno || '');
+                            calculatenetbasicpay();// Add any additional fields here
+                        }
+                    },
+                    error: function() {
+                        alert('Error fetching employee data');
+                    }
+                });
+            }
+        }
+    </script>
+
+
+</div>
+</body>
+</html>

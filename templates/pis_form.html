@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>"
+
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>"
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIS Form</title>
+    <style>
+        body {
+            width: auto;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .form-container {
+            max-width: auto;
+                margin: auto;
+                background: white;
+                padding: 10px;
+                border-radius: 8px;
+                box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            font-size: larger;
+            text-align: center;
+            color: #131212;
+        }
+        label {
+            font-size: 15px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input, select {
+            width: 100%; 
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        input[type="submit"] {
+            width: auto;
+            background-color: #4CAF50;
+            color: rgb(212, 250, 225);
+            border: none;
+            cursor: pointer;
+            align-self: center;
+            box-align: center;
+        }
+        input[type="submit"]:hover {
+           align-items: center;
+           align-content: center;
+           box-align: center;
+            background-color: #45a049;
+        }
+        .form-group {
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        select{
+            width:100%;
+            padding: 10px; 
+            
+        }
+        
+       
+    </style>
+</head>
+<body>
+    <script>
+        $(document).ready(function(){
+            $('#deptt').on('blur',function(){
+                let deptcode=$(this).val();
+                console.log("entered dept code", deptcode);
+
+                if(deptcode){
+                    $.ajax({
+                    url: '/get_department_name',
+                    type: 'GET',
+                    data: {deptt: deptcode },
+                    success: function(response){
+                        console.log(response);
+                        if (response.depttname !== "Invalid code"){
+                            $('#depttname').val(response.depttname);
+                        }
+                        else{
+                            alert('Invalid department code');
+                            $('#deptname').val('');
+                            }
+                    },
+                    error: function(xhr, ststus, error) {
+                        console.error("Error fetching department name", error);
+                        alert('Error fetching department name');
+                    }
+                });
+            }
+        });
+    });  
+
+
+    $(document).ready(function(){
+            $('#desgg').on('blur',function(){
+                let desgcode=$(this).val();
+                console.log("entered desgg code", desgcode);
+
+                if(desgcode){
+                    $.ajax({
+                    url: '/get_designation_name',
+                    type: 'GET',
+                    data: {desgg: desgcode },
+                    success: function(response){
+                        console.log(response);
+                        if (response.desggname !== "Invalid code"){
+                            $('#desggname').val(response.desggname);
+                        }
+                        else{
+                            alert('Invalid designation code');
+                            $('#desggname').val('');
+                            }
+                    },
+                    error: function(xhr, ststus, error) {
+                        console.error("Error fetching designation name", error);
+                        alert('Error fetching designation name');
+                    }
+                });
+            }
+        });
+    }); 
+
+    
+       
+    </script>
+   
+    
+    <div class=form-container>
+        <h2>Personal Information System Form</h2>
+        <form method="POST" action="{{url_for('pis_form') }}">
+            <div class="form-group">
+                <label for="emp_Id">Employee ID:</label>
+                <input type="number" name="emp_Id"  id="emp_Id"  required>
+            </div>
+            
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="deptt">Department Code:</label>
+                <input type="number" id="deptt" name="deptt" required>
+            </div>
+            <div class="form-group">
+                <label for="depttname">Department Name:</label>
+                <input type="text" id="depttname" name="depttname" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="private">Private</option>
+                    <option value="government">Government</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="desgg">Designation Code:</label>
+                <input type="number" id="desgg" name="desgg" required>
+
+            </div>
+            <div class="form-group">
+                <label for="desggname">Designation:</label>
+                <input type="text" id="desggname" name="desggname" readonly>
+            </div>
+
+
+            <div class="form-group">
+                <label for="sex">Sex:</label>
+                <select id="sex" name="sex" required>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="not_to_say">Prefer not to say</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="pwd">P.W.D (person with disability):</label>
+                <select id="pwd" name="pwd" required>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="dob">Date of Birth:</label>
+                <input type="date" id="dob" name="dob" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dateofjoining">Date of Joining:</label>
+                <input type="date" id="dateofjoining" name="dateofjoining" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dateofleaving">Date of Leaving:</label>
+                <input type="date" id="dateofleaving" name="dateofleaving">
+            </div>
+
+            <div class="form-group">
+                <label for="panno">PAN No:</label>
+                <input type="text" id="panno" name="panno" required pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}" title="PAN should be 10 characters: 5 letters, 4 digits, 1 letter" maxlength="10">
+            </div>
+
+            <div class="form-group">
+                <label for="aadharno">Aadhar No:</label>
+                <input type="text" id="aadharno" name="aadharno" required pattern="\d{12}" title="Aadhar number should be 12 digits" maxlength="12">
+            </div>
+
+            <div class="form-group">
+                <label for="basicpay">Basic Pay:</label>
+                <input type="number" id="basicpay" name="basicpay" required>
+            </div>
+
+            <div class="form-group">
+                <label for="hraadmissable">HRA Admissable:</label>
+                <select id="hraadmissable" name="hraadmissable" required>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="bankaccountno">Bank Account No:</label>
+                <input type="text" id="bankaccountno" name="bankaccountno" required>
+            </div>
+
+            <div class="form-group">
+                <label for="bankaccountcode">Bank Account Code:</label>
+                <input type="number" id="bankaccountcode" name="bankaccountcode" required>
+            </div>
+
+            <div class="form-group">
+                <label for="ifsccode">IFSC code:</label>
+                <input type="number" id="ifsccode" name="ifsccode" required>
+            </div>
+
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status" name="status" required>
+                    <option value="available">Available</option>
+                    <option value="retired">Retired</option>
+                    <option value="suspend">Suspended</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

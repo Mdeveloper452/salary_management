@@ -1,0 +1,545 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>"
+    <script src="path/to/your/script.js" defer></script>
+
+
+    <head>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>"
+        <script src="path/to/your/script.js" defer></script>
+
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard</title>
+        <style>
+            #main-content{
+                max-height: 100vh;
+                overflow-y: auto;
+                padding: 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .form-container{
+                width: 70%;
+                max-width: 800px;
+                background: white;
+                padding: 30px;
+                border-radius: 8px;
+                box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+                text-align: left;
+            }
+            form{
+                display: flex;
+                flex-direction: column;
+            }
+            .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+            label{
+                font-weight: bold;
+            }
+            input, select{
+                width: 100%;
+                padding: 10px;
+                margin-top: 5px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 16px;
+            }
+            button{
+                margin-top: 15px;
+                padding: 12px;
+                background: #28a745;
+                color: white;
+                border: none;
+                cursor: pointer;
+                width: 100%;
+                font-size: 16px;
+            }
+            button:hover{
+                background: #218838;
+            }
+            *{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: Arial, sans-serif;
+            }
+            
+            body{
+                display: flex;
+                height: 100vh;
+                overflow: hidden;
+                background: #f4f4f4;
+
+            }
+            .sidebar{
+                
+                color:white;
+                padding: 20px;
+                width: 200px;
+                background: #333;
+                overflow: hidden;
+                transition: width 0.3 ease-in-out;
+            }
+            .sidebar:hover{
+                width: 250px;
+            }
+            .sidebar a{
+                display: block;
+                color: white;
+                padding: 12px;
+                text-decoration: none;
+                transition: background 0.3s;
+            }
+            .sidebar a:hover{
+                background-color:#555;
+            }
+            .content{
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content:center ;
+                text-align: center;
+                background: white;
+                padding: 30px;
+                opacity: 0;
+                transform: translateY(20px);
+                animation: fadeIn 0.5s forwards;
+                width: 100%;
+            }
+            @keyframes fadeIn {
+                from{
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class=sidebar>
+            <a href="#" onclick="loadcontent('pis_form')">PIS form</a>
+            <a href="#" onclick="loadcontent('salary_form')">Salary form</a>
+            <a href="#" onclick="loadcontent('reports')">Reports</a>
+        </div>
+
+        <div class="content" id="main-content">
+            <h1>Welcome</h1>
+        </div>
+        <script>
+            function loadcontent(page) {
+                fetch(page)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("main-content").innerHTML = data.trim();
+                    console.log("Loaded:",page);
+                    if (page ==="pis_form.html"){
+                        console.log("reinitializing jQuery for pis form");
+                        enableDepttAJAX();
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("main-content").innerHTML ="Error loading page";
+                    console.error("Error",error);
+                });
+                
+            }
+
+            $(document).ready(function(){
+                $(".menu_item").click(function(e) {
+                    e.preventDefault();
+                    var page = $(this).attr("href");
+                    $("#main-content").load(page, function(){
+                    console.log('page loaded' ,page);
+                    if (page === "pis_form.html") {
+                        console.log(" reinitialize jquery for pis form");
+                        enableDepttAJAX();
+                    }
+                });
+            });
+
+
+
+            function enableDepttAJAX() {
+                $(document).off("input", "#deptt").on("input", "#deptt", function() {
+                    var depttcode = $(this).val().trim();
+                    console.log("entered deptt code " ,depttcode);
+                    if(depttcode !== ""){
+                        $.ajax({
+                            url: "/get_department_name",
+                            type: "GET",
+                            data: {deptt: depttcode },
+                            success: function(response) {
+                        console.log("response : ", response);
+                        $("#depttname").val(response.depttname);
+                    },
+                    error: function(){
+                        console.log("ajax request failed");
+                    }
+                });
+            }
+        });
+    }
+    enableDepttAJAX();
+});
+
+
+
+function enableDepttAJAX() {
+                $(document).off("input", "#desgg").on("input", "#desgg", function() {
+                    var desggcode = $(this).val().trim();
+                    console.log("entered desgg code " ,desggcode);
+                    if(desggcode !== ""){
+                        $.ajax({
+                            url: "/get_designation_name",
+                            type: "GET",
+                            data: {desgg: desggcode },
+                            success: function(response) {
+                        console.log("response : ", response);
+                        $("#desggname").val(response.desggname);
+                    },
+                    error: function(){
+                        console.log("ajax request failed");
+                    }
+                });
+            }
+        });
+    }
+    enableDepttAJAX();
+
+
+
+    function loadcontent(page) {
+                fetch(page)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("main-content").innerHTML = data.trim();
+                    console.log("Loaded:",page);
+                    if (page ==="reports.html"){
+                        console.log("reinitializing jQuery for reports");
+                        enableDepttAJAX();
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("main-content").innerHTML ="Error loading page";
+                    console.error("Error",error);
+                });
+
+            }               
+        
+
+$(document).ready(function(){
+    $(".menu_item").click(function(e) {
+        e.preventDefault();
+        var page = $(this).attr("href");
+        $("#main-content").load(page, function(){
+        console.log('page loaded' ,page);
+        if (page === "reports.html") {
+            console.log(" reinitialize jquery for reports");
+            enableDepttAJAX();
+        }
+    });
+});
+});
+   
+
+
+function loadcontent(page) {
+                fetch(page)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("main-content").innerHTML = data.trim();
+                    console.log("Loaded:",page);
+                    if (page ==="salary_form.html"){
+                        console.log("reinitializing jQuery for salary_form");
+                        enableDepttAJAX();
+                        //manageDeductions();
+                        
+                    
+                    
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("main-content").innerHTML ="Error loading page";
+                    console.error("Error",error);
+                });
+            }
+            
+$(document).ready(function(){
+    $(".menu_item").click(function(e) {
+        e.preventDefault();
+        var page = $(this).attr("href");
+        $("#main-content").load(page, function(){
+        console.log('page loaded' ,page);
+        if (page === "salary_form.html") {
+            console.log(" reinitialize jquery for salary form");
+            //$('#addDeduction').onclick(manageDeductions);
+            
+        }
+    });
+});
+});
+   
+      
+    
+
+function enableSalaryFormAJAX() {
+        $("#emp_Id").on("blur", fetchEmployee);
+      }
+
+      // Fetch employee data for salary form
+      function fetchEmployeeData() {
+        var emp_Id = document.getElementById("emp_Id").value;
+        if (emp_Id) {
+          fetch(`/fetch_employee?emp_Id=${emp_Id}`)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) {
+                alert("Employee not found");
+                resetFields(); // Reset fields if employee not found
+              } else {
+                // Populate the fields with the response data
+                document.getElementById("name").value = data.name;
+                document.getElementById("deptt").value = data.deptt;
+                document.getElementById("depttname").value = data.depttname;
+                document.getElementById("basicpay").value = data.basicpay;
+                document.getElementById("bankaccountno").value = data.bankaccountno;
+                calculatenetbasicpay();
+              }
+            })
+            .catch((err) => {
+              console.error("Error fetching employee data", err);
+            });
+        }
+      }
+
+
+
+function searchEmployee(){
+    var emp_Id = document.getElementById("searchEmpId").value;
+    fetch(`/get_employee/${emp_Id}`)
+    .then(response => response.json())
+    .then(data => {
+        if(data.error){
+            document.getElementById("employees").innerHTML =`<p class= 'text-danger'>${data.error}</p>`;
+        } else {
+            document.getElementById("employees").innerHTML = `
+            <p><strong>Name:</strong> ${data.name}</p>
+            <p><strong>Department:</strong> ${data.dept_name} (${data.deptt})</p>
+            <p><strong>Designation:</strong> ${data.desg_name} (${data.desgg})</p>
+            <p><strong>Status:</strong> ${data.status}</p>`;
+        }
+    });
+   } 
+   function searchByDepartment(){
+    var deptt= document.getElementById("searchDept").value;
+    var status = document.getElementById("deptStatus").value;
+    fetch(`/get_department/${deptt}?status=${status}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.error){
+            document.getElementById("departmentResults").innerHTML = `<p class='text-danger'>${data.error}</p>`;
+        }
+        else {
+            let employeeList = data.employees.map(emp => `<li>${emp.name} (ID: ${emp.emp_Id})</li>`).join("");
+            document.getElementById("departmentResults").innerHTML=`
+            <p><strong>Department:</strong> ${data.dept_name}</p>
+            <ul>${employeeList}</ul>
+            `;
+        }
+        
+    });
+   }
+
+function searchByDesignation(){
+    var desgg= document.getElementById("searchDesg").value;
+    var status = document.getElementById("desgStatus").value;
+    fetch(`/get_designation/${desgg}?status=${status}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.error){
+            document.getElementById("designationResults").innerHTML = `<p class='text-danger'>${data.error}</p>`;
+        } else {
+            let employeeList = data.employees.map(emp => `<li>${emp.name} (ID: ${emp.emp_Id})</li>`).join('');
+            document.getElementById("designationResults").innerHTML =`
+            <p><strong>Designation:</strong> ${data.desg_name}</p>
+            <ul>${employeeList}</ul>
+            `;
+        }
+    });
+}
+
+// Function to manage deductions (add, remove, and update)
+let deductionCount=1;
+function manageDeductions() {
+    // Add new deduction row
+  //  $('#addDeduction').click(function() {
+        
+        deductionCount++;
+        $('#deductionCount').val(deductionCount); // Update hidden field
+
+        const newDeductionRow = `
+            <div class="deduction-row" id="deduction-${deductionCount}">
+                <select name="deduction_code_${deductionCount}" id="deduction_code_${deductionCount}">
+                    <option value="">--Select Deduction Code--</option>
+                    <option value="1">Tax</option>
+                    <option value="2">Provident Fund</option>
+                    <option value="3">Loan</option>
+                    <!-- Add more deduction codes as needed -->
+                </select>
+                <input type="number" name="deduction_amount_${deductionCount}" id="deduction_amount_${deductionCount}" placeholder="Amount" oninput="updateNetPay()">
+                <button type="button" onclick="removeDeduction(${deductionCount})">Remove</button>
+            </div>
+        `;
+
+        $('#deduction').append(newDeductionRow);  // Append new row to deductions container
+    }
+//);
+
+    // Remove a deduction row
+    window.removeDeduction = function(id) {
+        $(`#deduction-${id}`).remove();  // Remove the selected row
+        updateNetPay();
+    }
+
+                //OTHEREARNINGS FUNCTION
+                let otherearningCount=1;
+    function manageOtherearning(){
+    otherearningCount++;
+    $('#otherearningCount').val(otherearningCount); // Update hidden field
+
+    const newOtherearningRow=`
+    <div class="otherearningrow" id="otherearning-${otherearningCount}">
+        <select name="otherearning_code_${otherearningCount}" id="otherearning_code_${otherearningCount}">
+            <option value="">--Select Other earning Code--</option>
+            <option value="1">Bonus</option>
+            <option value="2">Incentive</option>
+            <option value="3">Overtime</option>
+        </select>
+        <input type="number" name="otherearning_amount_${otherearningCount}" id="otherearning_amount_${otherearningCount}" placeholder="Amount" oninput="updateNetPay()">
+        <button type="button" onclick="removeOtherearning(${otherearningCount})">Remove</button>
+        </div>    
+    `;
+
+    $('#otherearning').append(newOtherearningRow);
+}
+
+window.removeOtherearning = function(id){
+    $(`#otherearning-${id}`).remove();
+    updateNetPay();
+};
+   // Update the net pay (subtract total deductions from net basic pay)
+        function updateNetPay(){
+        const netBasicPay = parseFloat(document.getElementById('netbasicpay').value) || 0;
+        const hra = parseFloat(document.getElementById('hra').value) || 0;
+
+        let totalDeductions = 0;
+        // Loop through all deduction inputs and sum their values
+        for (let i = 1; i <= deductionCount; i++) {
+            const deductionAmount = parseFloat($(`#deduction_amount_${i}`).val()) || 0;
+            totalDeductions += deductionAmount;
+        }
+
+        let totalOtherearnings = 0;
+    for (let i = 1; i <= otherearningCount; i++) {
+        const otherearningAmount = parseFloat($(`#otherearning_amount_${i}`).val()) || 0;
+        totalOtherearnings += otherearningAmount;
+    }
+
+        const netPay = (netBasicPay+hra+totalOtherearnings) - totalDeductions;
+        document.getElementById('netpay').value = netPay.toFixed(2);
+    }
+
+    $(document).on('input', '#netbasicpay, #hra', function() {
+            updateNetPay();
+        });
+
+    $(document).on('input', '.deduction-row input', function(){
+        updateNetPay();
+    });
+
+    $(document).on('input', '.otherearningrow input', function(){
+        updateNetPay();
+    });
+   
+    $(document).ready(function() {
+            manageDeductions();
+            manageOtherearning();
+        });
+
+
+
+     
+
+function updateDays() {
+        const month = document.getElementById('month').value;
+        const totalDaysInput = document.getElementById('totalDays');
+        
+        let days = 0;
+
+        // Check for each month
+        if (month == '1' || month == '3' || month == '5' || month == '7' || month == '8' || month == '10' || month == '12') {
+            days = 31; // These months have 31 days
+        } else if (month == '4' || month == '6' || month == '9' || month == '11') {
+            days = 30; // These months have 30 days
+        } else if (month == '2') {
+            // Handle February (leap year check)
+            const year = new Date().getFullYear();
+            days = isLeapYear(year) ? 29 : 28; // Leap year logic
+        }
+
+        totalDaysInput.value = days; // Update the days field
+        updateRemainingDays();
+    }
+    function updateRemainingDays() {
+        const totalDays = parseInt(document.getElementById('totalDays').value);
+        const absentdays = parseInt(document.getElementById('absentdays').value);
+        const remainingleaveInput = document.getElementById('remainingleave');
+
+        if (!isNaN(totalDays) && !isNaN(absentdays)) {
+            const remainingleave = totalDays - absentdays;
+            remainingleaveInput.value = remainingleave >= 0 ? remainingleave : 0; // Ensure no negative days
+         calculatenetbasicpay();
+        }
+    }
+    
+    function calculatenetbasicpay(){
+        const basicpay= parseFloat(document.getElementById('basicpay').value);
+        const remainingleave = parseFloat(document.getElementById('remainingleave').value);
+        const totalDays = parseFloat(document.getElementById('totalDays').value);
+        const netbasicpayinput = document.getElementById('netbasicpay');
+        const hraInput = document.getElementById('hra');
+
+
+        if (!isNaN(basicpay) && !isNaN(remainingleave)&& !isNaN(totalDays)) {
+            const basicpayrate = (remainingleave / totalDays) *basicpay;
+            netbasicpayinput.value = basicpayrate.toFixed(2);
+            const hra = basicpayrate*0.30;
+            hraInput.value=hra.toFixed(2);
+            updateNetPay();
+        }
+    }
+
+
+    // Function to check if the year is a leap year
+    function isLeapYear(year) {
+        return (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0));
+    }
+
+ </script>
+    </body>
+</html>

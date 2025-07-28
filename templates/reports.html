@@ -1,0 +1,99 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>"
+
+<div class="container mt-4">
+    <h2>Reports</h2>
+    <form method="POST" action="{{url_for('reports') }}"></form>
+
+    <div class="card mt-3">
+        <div class="card-reader">Search Employee by ID</div>
+        <div class="card_body">
+            <input type="text" id="searchEmpId" class="form-control" placeholder="Enter Employee ID">
+            <button class="btn-primary mt-2" onclick="searchEmployee()">Search</button>
+            <div id="employees" class="mt-3"></div>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-reader">Employees by Department</div>
+        <div class="card-body">
+            <input type="text" id="searchDept" class="form-control" placeholder="Enter Department Code">
+            <select id="deptStatus" class="form-control mt-2">
+                <option value="all">All</option>
+                <option value="available">Available</option>
+                <option value="retired">Retired</option>
+                <option value="suspend">Suspend</option>
+            </select>
+            <button class="btn-primary mt-2" onclick="searchByDepartment()">Search</button>
+            <div id="departmentResults" class="mt-3"></div>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">Employees by Designation</div>
+        <div class="card-body">
+            <input type="text" id="searchDesg" class="form-control" placeholder="Enter Designation Code">
+            <select id="desgStatus" class="form-control mt-2">
+                <option value="all">All</option>
+                <option value="active">Available</option>
+                <option value="inactive">Retired</option>
+            </select>
+            <button class="btn-primary mt-2" onclick="searchByDesignation()">Search</button>
+            <div id="designationResults" class="mt-3"></div>
+        </div>
+    </div>
+</div>
+<script>
+   function searchEmployee(){
+    var emp_Id = document.getElementById("searchEmpId").value;
+    fetch(`/get_employee/${emp_Id}`)
+    .then(response => response.json())
+    .then(data => {
+        if(data.error){
+            document.getElementById("employees").innerHTML =`<p class= 'text-danger'>${data.error}</p>`;
+        } else {
+            document.getElementById("employees").innerHTML = `
+            <p><strong>Name:</strong> ${data.name}</p>
+            <p><strong>Department:</strong> ${data.dept_name} (${data.deptt})</p>
+            <p><strong>Designation:</strong> ${data.desg_name} (${data.desgg})</p>
+            <p><strong>Status:</strong> ${data.status}</p>`;
+        }
+    });
+   } 
+   function searchByDepartment(){
+    var deptt= document.getElementById("searchDept").value;
+    var status = document.getElementById("deptStatus").value;
+    fetch(`/get_department/${deptt}?status=${status}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.error){
+            document.getElementById("departmentResults").innerHTML = `<p class='text-danger'>${data.error}</p>`;
+        }
+        else {
+            let employeeList = data.employees.map(emp => `<li>${emp.name} (ID: ${emp.emp_Id})</li>`).join("");
+            document.getElementById("departmentResults").innerHTML=`
+            <p><strong>Department:</strong> ${data.dept_name}</p>
+            <ul>${employeeList}</ul>
+            `;
+        }
+        
+    });
+   }
+
+function searchByDesignation(){
+    var desgg= document.getElementById("searchDesg").value;
+    var status = document.getElementById("desgStatus").value;
+    fetch(`/get_designation/${desgg}?status=${status}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.error){
+            document.getElementById("designationResults").innerHTML = `<p class='text-danger'>${data.error}</p>`;
+        } else {
+            let employeeList = data.employees.map(emp => `<li>${emp.name} (ID: ${emp.emp_Id})</li>`).join('');
+            document.getElementById("designationResults").innerHTML =`
+            <p><strong>Designation:</strong> ${data.desg_name}</p>
+            <ul>${employeeList}</ul>
+            `;
+        }
+    });
+}
+</script>

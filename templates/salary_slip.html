@@ -1,0 +1,372 @@
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from mysql.connector import connection
+from db import db_connection
+import hashlib
+
+app = Flask(__name__)
+
+app.secret_key = '12345'
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        emp_Id = request.form['emp_Id']
+        username = request.form['username']
+        password = request.form['password']
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        test_db = db_connection()
+        cursor = test_db.cursor()
+        cursor.execute("SELECT * FROM users WHERE emp_Id = %s", (emp_Id,))
+        existing_user = cursor.fetchone()
+        if existing_user:
+            flash("Employee ID already exists. Try a different one.", 'danger')
+            return redirect(url_for('register'))
+
+        cursor.execute("INSERT INTO users(emp_Id, username, password) VALUES (%s, %s, %s)", (emp_Id, username,password))
+        test_db.commit()
+
+        cursor.close()
+        test_db.close()
+
+        flash('Registration successful! You can now login.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        test_db = db_connection()
+        cursor = test_db.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username,password))
+        user = cursor.fetchone()
+        cursor.close()
+        test_db.close()
+        if user:
+            session['username'] = username
+            flash("Login Successful!", "success")
+            return redirect(url_for('dashboard'))
+        else:
+            flash("Invalid Employee ID or Password", "danger")
+            return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
+@app.route('/salary_form', methods=['GET', 'POST'])
+def salary_form():
+    if request.method == 'POST':
+        emp_Id = session.get('emp_Id')
+        basicpay = request.form['basicpay']
+        hra = request.form['hra']
+        other_allowances = request.form['other_allowances']
+        deductions = request.form['deductions']
+        gross_salary = request.form['gross_salary']
+
+        test_db = db_connection()
+        cursor = test_db.cursor()
+        cursor.execute("""
+            INSERT INTO salary (emp_Id, basicpay, hra, other_allowances, deductions, gross_salary)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (emp_Id, basicpay, hra, other_allowances, deductions, gross_salary))
+        test_db.commit()
+        cursor.close()
+        test_db.close()
+
+        flash("Salary details saved successfully.", "success")
+        return redirect(url_for('dashboard'))
+
+    return render_template('salary_form.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('emp_Id', None)
+    flash("Logged out successfully", "success")
+    return redirect(url_for('home'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+
+
+    <div class="container">
+        <h1>Welcome, {{ username  }}</h1>
+        <p class="message">You have successfully logged in.</p>
+        <div class="dashboard-menu">
+            <a href="{{url_for('home')}}" class="btn index">Index</a>
+            <a href="{{url_for('pis_form')}}" class="btn pis_form">pis_form</a>
+            <a href="{{url_for('salary_form')}}" class="btn salary_form">salary_form</a>
+            <a href="{{url_for('logout')}}" class="btn logout">Logout</a>
+
+
+
+
+
+
+            function loadcontent(page) {
+                const contentDiv = document.getElementById("main-content");
+
+                contentDiv.style.opacity = "0";
+                contentDiv.style.transform ="translateY(20px)";
+                setTimeout(() => {
+                    fetch('page')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("page not found");
+                        }
+                    return response.text();
+                    })
+                    .then(data => {
+                        document.getElementById("main-content").innerHTML = data;
+                })
+                .catch(error => {
+                    document.getElementById("main-content").innerHTML = "Error loading pages";
+                    console.error("Error", error);
+                });
+
+                contentDiv.style.animation = "none";
+                void contentDiv.offsetWidth;
+                contentDiv.style.animation = "fadeIn 0.5s forwards";
+            }, 300);
+        }
+
+
+
+
+
+
+        Salary 
+        
+
+
+
+        <script>
+            $(document).ready(function(){
+                $('#deptt').on('blur',function(){
+                    let deptcode=$(this).val();
+                    console.log("entered dept code", deptcode);
+    
+                    if(deptcode){
+                        $.ajax({
+                        url: '/get_department_name',
+                        type: 'GET',
+                        data: {deptt: deptcode },
+                        success: function(response){
+                            console.log(response);
+                            if (response.depttname !== "Invalid code"){
+                                $('#depttname').val(response.depttname);
+                            }
+                            else{
+                                alert('Invalid department code');
+                                $('#deptname').val('');
+                                }
+                        },
+                        error: function(xhr, ststus, error) {
+                            console.error("Error fetching department name", error);
+                            alert('Error fetching department name');
+                        }
+                    });
+                }
+            });
+        });  
+        </script>
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reports</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>"
+<style>
+    body{font-family:Arial, Helvetica, sans-serif;}
+        .container{ width: 60%; margin: auto; padding: 20px;}
+        .form-group{ margin-bottom: 15px;}
+        label{ font-weight: bold;}
+        input, select, button{ width: 100%; padding: 8px; margin-top: 5px;}
+        #employee_details, #employeelist{ display: none; margin-top: 20px;}
+</style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Reports</h2>
+
+            <div class="form-group">
+                <label for="emp_Id">Search Employee by ID:</label>
+                <input type="number" id="emp_Id" placeholder="Enter Employee ID">
+                <button onclick="searchemployee()">Search</button>  
+            </div>
+            <div id="employee-details"></div>
+            <hr>
+
+            <div class="form-group">
+                <label for="department">Department:</label>
+                <input type="number" id="department" placeholder="Enter Department Code">
+            </div>
+            <div class="form-group">
+                <label for="designation">Designation:</label>
+                <input type="text" id="designation" placeholder="Enter Designation Code">
+            </div>
+            <script>
+                function searchEmployee(){
+                    let emp_Id =
+                }
+            </script>
+        </div>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Form</title>
+</head>
+<body>
+    <h1>Enter Salary Details</h1>
+
+    <!-- Flash messages for success or error -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+1800 258 7332 
+    <!-- Form to submit salary details -->
+    <form method="POST">
+        <label for="emp_Id">Employee ID:</label>
+        <input type="text" id="emp_Id" name="emp_Id" value="{{ employee_data['emp_Id'] if employee_data else '' }}" readonly><br><br>
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="{{ employee_data['name'] if employee_data else '' }}" readonly><br><br>
+
+        <label for="deptt">Department Code:</label>
+        <input type="text" id="deptt" name="deptt" value="{{ employee_data['deptt'] if employee_data else '' }}" readonly><br><br>
+
+        <label for="depttname">Department Name:</label>
+        <input type="text" id="depttname" name="depttname" value="{{ employee_data['depttname'] if employee_data else '' }}" readonly><br><br>
+
+        <label for="basicpay">Basic Pay:</label>
+        <input type="number" id="basicpay" name="basicpay" value="{{ employee_data['basicpay'] if employee_data else '' }}" required><br><br>
+
+        <label for="bankaccountno">Bank Account No:</label>
+        <input type="text" id="bankaccountno" name="bankaccountno" value="{{ employee_data['bankaccountno'] if employee_data else '' }}" readonly><br><br>
+
+        <label for="hra">HRA:</label>
+        <input type="number" id="hra" name="hra" required><br><br>
+
+        <label for="otherallowances">Other Allowances:</label>
+        <input type="number" id="otherallowances" name="otherallowances" required><br><br>
+
+        <label for="deductions">Deductions:</label>
+        <input type="number" id="deductions" name="deductions" required><br><br>
+
+        <label for="grosssalary">Gross Salary:</label>
+        <input type="number" id="grosssalary" name="grosssalary" required><br><br>
+
+        <label for="leave">Leave:</label>
+        <input type="number" id="leave" name="leave" required><br><br>
+
+        <label for="remainingleave">Remaining Leave:</label>
+        <input type="number" id="remainingleave" name="remainingleave" required><br><br>
+        
+        
+        <label for="totalleave">Total Leave:</label>
+        <input type="number" id="totalleave" name="totalleave" required><br><br>
+
+        <button type="submit">Save Salary Details</button>
+    </form>
+</body>
+</html>
+
+
+
+
+
+       
+
+
+let deductionCount = 0;
+
+// Function to add a new deduction row
+$('#addDeduction').click(function() {
+    deductionCount++;
+
+    const newDeductionRow = `
+        <div class="deduction-row" id="deduction-${deductionCount}">
+            <select name="deduction_code_${deductionCount}" id="deduction_code_${deductionCount}">
+                <option value="">--Select Deduction Code--</option>
+                <option value="1">Tax</option>
+                <option value="2">Provident Fund</option>
+                <option value="3">Loan</option>
+                <!-- Add more deduction codes as needed -->
+            </select>
+            <input type="number" name="deduction_amount_${deductionCount}" id="deduction_amount_${deductionCount}" placeholder="Amount" oninput="updateTotalDeductions()">
+            <button type="button" onclick="removeDeduction(${deductionCount})">Remove</button>
+        </div>
+    `;
+
+      // Append the new row to the deductions container
+      $('#deduction').append(newDeductionRow);
+        });
+
+        // Function to remove a deduction row
+        function removeDeduction(id) {
+            $(`#deduction-${id}`).remove();
+            updateTotalDeductions();
+        }
+
+        // Function to calculate total deductions and subtract from net basic pay
+        function updateTotalDeductions() {
+            let totalDeductions = 0;
+
+            // Loop through all deduction inputs and sum their values
+            for (let i = 1; i <= deductionCount; i++) {
+                const deductionAmount = parseFloat($(`#deduction_amount_${i}`).val()) || 0;
+                totalDeductions += deductionAmount;
+            }
+
+            // Update the net pay
+            const netBasicPay = parseFloat(document.getElementById('netbasicpay').value) || 0;
+            const netPay = netBasicPay - totalDeductions;
+            document.getElementById('netpay').value = netPay.toFixed(2);
+        }
+    
